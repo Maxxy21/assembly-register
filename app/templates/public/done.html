@@ -1,0 +1,16 @@
+{% extends "public/base.html" %}
+{% block title %}Checked in{% endblock %}
+{% block content %}
+<section class="done">
+  <div class="tick" aria-hidden="true"></div>
+  {% if result.already %}
+  <h2 class="done-title">You’re already checked in, {{ result.name }}.</h2>
+  <p class="done-text">Nothing more to do. Enjoy the service.</p>
+  {% else %}
+  <h2 class="done-title">Akwaaba, {{ result.name }}!</h2>
+  <p class="done-text">You’re checked in. You can put your phone away.</p>
+  {% endif %}
+  <p class="done-small">Not you? Tell an usher and they will put it right.</p>
+  <a class="btn btn-quiet" href="/s/{{ service.qr_token }}">Check in someone else</a>
+</section>
+{% endblock %}

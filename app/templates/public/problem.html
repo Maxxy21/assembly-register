@@ -1,0 +1,8 @@
+{% extends "public/base.html" %}
+{% block title %}Something went wrong{% endblock %}
+{% block content %}
+<section class="notice">
+  <h2 class="notice-title">{{ message }}</h2>
+  {% if service %}<a class="btn btn-quiet" href="/s/{{ service.qr_token }}">Back</a>{% endif %}
+</section>
+{% endblock %}

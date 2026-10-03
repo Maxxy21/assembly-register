@@ -1,0 +1,60 @@
+{% extends "public/base.html" %}
+{% block head %}<script src="/static/checkin.js" defer></script>{% endblock %}
+{% block main_attrs %}data-token="{{ service.qr_token }}"{% endblock %}
+{% block content %}
+{% set action = "/s/" ~ service.qr_token ~ "/check-in" %}
+<section id="find" class="find" aria-labelledby="find-label">
+  <form class="search" method="get" action="/s/{{ service.qr_token }}" role="search">
+    <label id="find-label" for="q" class="label">Find your name</label>
+    <input id="q" name="q" type="search" value="{{ q }}" autocomplete="off"
+           autocapitalize="words" autocorrect="off" spellcheck="false"
+           enterkeyhint="search" aria-describedby="q-hint" aria-controls="results">
+    <p id="q-hint" class="hint">Type the first few letters of your name, then tap your name.</p>
+    <noscript><button class="btn btn-quiet" type="submit">Search</button></noscript>
+  </form>
+
+  <p id="status" class="status" role="status" aria-live="polite">
+    {%- if hits is not none and not hits -%}
+      No name found for “{{ q }}”. Check the spelling, or ask an usher.
+    {%- endif -%}
+  </p>
+
+  <ul id="results" class="results">
+    {%- if hits %}{% for hit in hits %}
+    <li>
+      <form method="post" action="{{ action }}">
+        <input type="hidden" name="member_id" value="{{ hit.id }}">
+        <button type="submit" class="person{% if hit.checked_in %} is-here{% endif %}">
+          <span class="person-name">{{ hit.name }}</span>
+          {% if hit.checked_in %}<span class="tag">Already here</span>{% endif %}
+        </button>
+      </form>
+    </li>
+    {% endfor %}{% endif -%}
+  </ul>
+</section>
+
+<section id="visitor" class="visitor">
+  <details>
+    <summary>First time here? Welcome!</summary>
+    <form id="visitor-form" method="post" action="{{ action }}" class="visitor-form">
+      <label for="visitor_name" class="label-sm">Your name</label>
+      <input id="visitor_name" name="visitor_name" type="text" required maxlength="200"
+             autocomplete="name" autocapitalize="words">
+      <label for="visitor_phone" class="label-sm">Phone number <span class="optional">(optional)</span></label>
+      <input id="visitor_phone" name="visitor_phone" type="tel" maxlength="40"
+             autocomplete="tel" inputmode="tel" aria-describedby="phone-why">
+      <p id="phone-why" class="hint">Only so someone from the church can say thank you for visiting.</p>
+      <button type="submit" class="btn">Check me in</button>
+    </form>
+  </details>
+</section>
+
+<section id="done" class="done" hidden tabindex="-1" aria-live="polite">
+  <div class="tick" aria-hidden="true"></div>
+  <h2 id="done-title" class="done-title"></h2>
+  <p id="done-text" class="done-text"></p>
+  <p class="done-small">Not you? Tell an usher and they will put it right.</p>
+  <button type="button" id="again" class="btn btn-quiet">Check in someone else</button>
+</section>
+{% endblock %}

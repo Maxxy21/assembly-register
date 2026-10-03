@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>{% block title %}Register{% endblock %}{% if assembly %} · {{ assembly.name }}{% endif %}</title>
+  <link rel="stylesheet" href="/static/admin.css">
+  <script src="/static/admin.js" defer></script>
+</head>
+<body>
+  <header class="top">
+    <div class="top-inner">
+      <a class="brand" href="/admin/ui">{% if assembly %}{{ assembly.name }}{% else %}Register{% endif %}</a>
+      {% if assembly %}
+      <nav aria-label="Main">
+        <a href="/admin/ui">Services</a>
+        <a href="/admin/ui/members">Members</a>
+        <form method="post" action="/admin/ui/logout" class="inline"><button class="link">Sign out</button></form>
+      </nav>
+      {% endif %}
+    </div>
+  </header>
+  <main class="wrap">
+    {% set notices = {
+      "added": "Added.",
+      "already": "Already checked in.",
+      "removed": "Check-in removed.",
+      "deleted": "Member and all their attendance records deleted.",
+      "pick": "Choose a member or enter a visitor name.",
+      "cannot": "That member can’t be checked in (inactive, no consent, or not found).",
+      "names": "First and last name are both needed."
+    } %}
+    {% if message %}
+      {% if message.startswith("retention:") %}
+        <p class="flash" role="status">Retention run: {{ message.split(":")[1] }} attendance record(s) older than {{ retention_days|period }} deleted.</p>
+      {% elif message in notices %}
+        <p class="flash" role="status">{{ notices[message] }}</p>
+      {% endif %}
+    {% endif %}
+    {% if error %}<p class="flash flash-error" role="alert">{{ error }}</p>{% endif %}
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

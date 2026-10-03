@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b2418">
+  <meta name="robots" content="noindex, nofollow">
+  <title>{% block title %}Check in{% endblock %}{% if assembly %} · {{ assembly.name }}{% endif %}</title>
+  <link rel="stylesheet" href="/static/checkin.css">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <div class="band" aria-hidden="true"></div>
+  <main class="page" {% block main_attrs %}{% endblock %}>
+    <header class="masthead">
+      {% if assembly %}<h1 class="church">{{ assembly.name }}</h1>{% endif %}
+      {% if service %}<p class="service">{{ service.title }}<span class="dot" aria-hidden="true"> · </span><br class="narrow"><span class="nowrap">{{ service.service_date|longdate }}</span></p>{% endif %}
+    </header>
+
+    {% block content %}{% endblock %}
+
+    <footer class="footer">
+      <h2>Why we record attendance</h2>
+      <p>So our pastors notice when you have been away and can call to see how you are. Your check-in is kept for {{ retention_days|period }} and used for nothing else.</p>
+      <p>Anyone can ask to see or delete their record. Speak to a pastor or an usher{% if assembly and assembly.contact_email %}, or write to <a href="mailto:{{ assembly.contact_email }}">{{ assembly.contact_email }}</a>{% endif %}.</p>
+    </footer>
+  </main>
+</body>
+</html>

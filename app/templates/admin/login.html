@@ -1,0 +1,13 @@
+{% extends "admin/base.html" %}
+{% block title %}Sign in{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>Team sign-in</h1>
+  <p class="muted">Paste your assembly’s admin token. You stay signed in on this device for 12 hours.</p>
+  <form method="post" action="/admin/ui/login">
+    <label for="token">Admin token</label>
+    <input id="token" name="token" type="password" required autocomplete="current-password">
+    <button class="btn">Sign in</button>
+  </form>
+</section>
+{% endblock %}

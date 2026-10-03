@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
+from datetime import time
 
 
 def _database_url() -> str:
@@ -18,11 +19,22 @@ def _database_url() -> str:
     return f"postgresql+psycopg://{user}:{password}@{host}:{port}/{db}"
 
 
+def _time(name: str, default: str) -> time:
+    return time.fromisoformat(os.environ.get(name, default))
+
+
 @dataclass(frozen=True)
 class Settings:
     database_url: str
     base_url: str
     retention_days: int
+    # Default check-in window for a new service, in the assembly's local time.
+    default_opens: time
+    default_closes: time
+
+    @property
+    def secure_cookies(self) -> bool:
+        return self.base_url.startswith("https://")
 
 
 def load_settings() -> Settings:
@@ -30,6 +42,8 @@ def load_settings() -> Settings:
         database_url=_database_url(),
         base_url=os.environ.get("BASE_URL", "http://localhost:8000").rstrip("/"),
         retention_days=int(os.environ.get("RETENTION_DAYS", "730")),
+        default_opens=_time("SERVICE_OPENS", "08:30"),
+        default_closes=_time("SERVICE_CLOSES", "15:00"),
     )
 
 

@@ -1,0 +1,65 @@
+{% extends "admin/base.html" %}
+{% block title %}Services{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>New service</h1>
+  <form method="post" action="/admin/ui/services" class="grid">
+    <div>
+      <label for="service_date">Date</label>
+      <input id="service_date" name="service_date" type="date" required value="{{ next_sunday.isoformat() }}">
+    </div>
+    <div>
+      <label for="title">Title</label>
+      <input id="title" name="title" type="text" placeholder="Sunday Service" maxlength="200">
+    </div>
+    <div>
+      <label for="opens">Check-in opens</label>
+      <input id="opens" name="opens" type="time" value="{{ default_opens }}">
+    </div>
+    <div>
+      <label for="closes">Check-in closes</label>
+      <input id="closes" name="closes" type="time" value="{{ default_closes }}">
+    </div>
+    <div class="span">
+      <button class="btn">Create service and show QR code</button>
+      <p class="muted small">Times are {{ assembly.timezone }}. Each service gets a fresh code that only works inside this window.</p>
+    </div>
+  </form>
+</section>
+
+<section class="card">
+  <h2>Services</h2>
+  {% if services %}
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Date</th><th>Title</th><th class="num">Members</th><th class="num">Visitors</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for service, members_present, visitors_present in services %}
+      <tr>
+        <td><a href="/admin/ui/services/{{ service.id }}">{{ service.service_date.strftime("%a %d %b %Y") }}</a></td>
+        <td>{{ service.title }}</td>
+        <td class="num">{{ members_present }}</td>
+        <td class="num">{{ visitors_present }}</td>
+        <td>
+          {% if service.is_open(now) %}<span class="pill pill-open">Open now</span>
+          {% elif now < service.opens_at %}<span class="pill">Opens {{ service.opens_at|datetime(assembly.timezone) }}</span>
+          {% else %}<span class="pill pill-closed">Closed</span>{% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <p class="muted">No services yet. Create this Sunday’s above.</p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>Data retention</h2>
+  <p class="muted">Deletes every check-in older than {{ retention_days|period }} for this assembly. Member records are not touched.</p>
+  <form method="post" action="/admin/ui/retention" data-confirm="Delete all check-ins older than {{ retention_days|period }}? This cannot be undone.">
+    <button class="btn btn-quiet">Run retention now</button>
+  </form>
+</section>
+{% endblock %}

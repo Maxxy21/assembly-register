@@ -1,0 +1,94 @@
+{% extends "admin/base.html" %}
+{% block title %}{{ service.title }} {{ service.service_date }}{% endblock %}
+{% block content %}
+<p><a href="/admin/ui">← All services</a></p>
+<section class="card qr-card">
+  <div class="qr-text">
+    <h1>{{ service.title }}</h1>
+    <p class="lead">{{ service.service_date|longdate }}</p>
+    <p>Check-in {{ service.opens_at|time(assembly.timezone) }}–{{ service.closes_at|time(assembly.timezone) }}
+      {% if is_open %}<span class="pill pill-open">Open now</span>{% endif %}</p>
+    <p class="url"><code>{{ url }}</code></p>
+    <p class="actions">
+      <a class="btn" href="/admin/services/{{ service.id }}/qr.png" download>Download PNG to print</a>
+      <a class="btn btn-quiet" href="{{ url }}" target="_blank" rel="noopener">Open check-in page</a>
+    </p>
+  </div>
+  <div class="qr" role="img" aria-label="QR code for the check-in page">{{ qr|safe }}</div>
+</section>
+
+<section class="card">
+  <h2>Present <span class="count">{{ attendance|length }}</span></h2>
+  {% if attendance %}
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Name</th><th>Time</th><th>How</th><th></th></tr></thead>
+    <tbody>
+    {% for a in attendance %}
+      <tr>
+        <td>{% if a.member %}{{ a.member.full_name }}{% else %}{{ a.visitor_name }} <span class="pill">Visitor</span>{% if a.visitor_phone %} <span class="muted">{{ a.visitor_phone }}</span>{% endif %}{% endif %}</td>
+        <td>{{ a.checked_in_at|time(assembly.timezone) }}</td>
+        <td>{{ "QR" if a.method == "qr" else "Usher" }}</td>
+        <td class="right">
+          <form method="post" action="/admin/ui/services/{{ service.id }}/attendance/{{ a.id }}/delete" class="inline"
+                data-confirm="Remove this check-in?">
+            <button class="link danger">Remove</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <p class="muted">Nobody has checked in yet.</p>
+  {% endif %}
+
+  <details class="manual">
+    <summary>Add someone by hand</summary>
+    <div class="grid">
+      <form method="post" action="/admin/ui/services/{{ service.id }}/manual">
+        <label for="member_id">Member</label>
+        <select id="member_id" name="member_id" required>
+          <option value="">Choose…</option>
+          {% for m in addable %}<option value="{{ m.id }}">{{ m.last_name }}, {{ m.first_name }}</option>{% endfor %}
+        </select>
+        <button class="btn">Check in member</button>
+      </form>
+      <form method="post" action="/admin/ui/services/{{ service.id }}/manual">
+        <label for="visitor_name">Visitor name</label>
+        <input id="visitor_name" name="visitor_name" required maxlength="200">
+        <label for="visitor_phone">Phone (optional)</label>
+        <input id="visitor_phone" name="visitor_phone" type="tel" maxlength="40">
+        <button class="btn">Check in visitor</button>
+      </form>
+    </div>
+  </details>
+</section>
+
+<section class="card">
+  <div class="row">
+    <h2>Absent <span class="count">{{ absentees|length }}</span></h2>
+    <a class="btn btn-quiet" href="/admin/services/{{ service.id }}/absentees.csv">Download call list (CSV)</a>
+  </div>
+  <p class="muted small">Active members who have given consent and did not check in.</p>
+  {% if absentees %}
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Name</th><th>Phone</th><th>Notes</th></tr></thead>
+    <tbody>
+    {% for m in absentees %}
+      <tr>
+        <td>{{ m.full_name }}</td>
+        <td>{% if m.phone %}<a href="tel:{{ m.phone|replace(' ', '') }}">{{ m.phone }}</a>{% else %}<span class="muted">—</span>{% endif %}</td>
+        <td class="muted">{{ m.notes or "" }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <p class="muted">Everyone was here.</p>
+  {% endif %}
+</section>
+{% endblock %}

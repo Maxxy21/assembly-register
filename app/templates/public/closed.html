@@ -1,0 +1,13 @@
+{% extends "public/base.html" %}
+{% block title %}Check-in closed{% endblock %}
+{% block content %}
+<section class="notice">
+  {% if not_yet %}
+  <h2 class="notice-title">Check-in opens at {{ service.opens_at|time(assembly.timezone) }}</h2>
+  <p>Please scan the code again when you arrive for the service.</p>
+  {% else %}
+  <h2 class="notice-title">Check-in for this service has closed</h2>
+  <p>If you were here today and didn’t check in, please tell an usher.</p>
+  {% endif %}
+</section>
+{% endblock %}
